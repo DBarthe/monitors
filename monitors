@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+MONITORS_DIR=${HOME}/.config/dbarthe.monitors
+
+CURRENT_SETTINGS=${HOME}/.config/monitors.xml
+
+main() {
+    setup
+    parse_and_exec_cmd $@
+}
+
+setup() {
+    mkdir -p "$MONITORS_DIR"
+}
+
+parse_and_exec_cmd() {
+    case $1 in
+    save)
+        monitors_save $@
+    ;;
+    restore)
+        monitors_restore $@
+    ;;
+    list)
+        monitors_list $@
+    ;;
+    *|help)
+        monitors_help $@
+    esac
+}
+
+monitors_help() {
+    echo "usage: $0 [cmd] [args...]"
+    echo ""
+    echo "Use the following cmd:"
+    echo "    save <name>       save current monitors settings"
+    echo "    restore <name>    restore monitors settings you saved"
+    echo "    list              list available settings"
+    echo "    help              print this help"
+}
+
+monitors_restore() {
+    if [ $# -lt 2 ]; then
+        monitors_help
+        exit 1
+    fi
+    name=$2
+    if [ ! -e "$MONITORS_DIR/$name" ]; then
+        echo "error: settings $name does not exist"
+        exit 1
+    fi
+    cp "$MONITORS_DIR/$name" "$CURRENT_SETTINGS"
+}
+
+monitors_save() {
+    if [ $# -lt 2 ]; then
+        monitors_help
+        exit 1
+    fi
+    name=$2
+    cp "$CURRENT_SETTINGS" "$MONITORS_DIR/$name"
+}
+
+monitors_list() {
+    ls $MONITORS_DIR
+}
+
+main $@
